@@ -1,4 +1,5 @@
 from calendar import calendar
+from pickle import FALSE
 from playwright.sync_api import Playwright, sync_playwright, expect, TimeoutError
 from bs4 import BeautifulSoup
 import time
@@ -42,17 +43,33 @@ def login(account, password, page):
 
 def on_response(response):
     global seat
+    global wantDate
     if '/orderAPI/otGetPossible' in response.url and response.status == 200:
+        seat = 0
         res = response.json()["res2"]
         index1 = res[0]
         content = index1["content"]
         index2 = content[0]
-        data = index2["data"]
-        seat = data["seat"]
-        print("座位:", seat, datetime.now())
+        # 多座位
+        calendar = index2["calendar"]
+        for date in wantDate:
+            tmpSeat = calendar[date]
+            # tmpSeat = 2
+            if (tmpSeat >= 2):
+                wantDate[date] = tmpSeat
+            seat += tmpSeat
+            print(date, "座位:", tmpSeat, datetime.now())
+        # 單一座位
+        # data = index2["data"]
+        # seat = data["seat"]
+        # print("座位:", seat, datetime.now())
 
 
 def run(playwright: Playwright) -> None:
+    global isHaveSeat
+    global wantDate
+    global seat
+    global oldSeat
     browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
 
@@ -118,6 +135,30 @@ def run(playwright: Playwright) -> None:
 
         # Click text=微風店 >> nth=1
         page.locator("text=全部分店").nth(1).click()
+
+        while True:
+            time.sleep(15)
+            # Click text=晚餐
+            page.locator(mealTime).first.click()
+            headers = {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/x-www-form-urlencoded"
+            }   
+            if (seat >= 2 and seat != oldSeat):
+                oldSeat = seat
+                tmpMessage = ""
+                for date in wantDate:
+                    msg = date + "尚有" + str(wantDate[date]) + "個座位\n"
+                    tmpMessage += msg
+                params = {"message": tmpMessage}
+        
+                r = requests.post("https://notify-api.line.me/api/notify",
+                                headers=headers, params=params)
+                print(r.status_code)  #200
+
+                print("Have Seat!!")
+            
+            
     except TimeoutError as timeoutError:
         print("有time error錯誤:", timeoutError)
     except:
@@ -145,26 +186,18 @@ def run(playwright: Playwright) -> None:
 
 isHaveSeat = False
 seat = 0
-dataInfo = "[aria-label=\"五月 29\\, 2022\"]"
+oldSeat = 0
+dataInfo = "[aria-label=\"七月 16\\, 2022\"]"
 mealTime = "text=午餐"
+wantDate = {"2022-07-16": 0, "2022-07-23": 0}
 token = "QGuub3Vwntxa0RJbnzRlldcRGbaskNT85sS24V2bN4O"
 
 with sync_playwright() as playwright:
-    while seat <= 0:
+    while True:
         run(playwright)
-        time.sleep(1)
-    else:
-        headers = {
-        "Authorization": "Bearer " + token,
-        "Content-Type": "application/x-www-form-urlencoded"
-    }
-        params = {"message": "尚有"+ str(seat) +"個座位"}
+        time.sleep(2)
     
-        r = requests.post("https://notify-api.line.me/api/notify",
-                        headers=headers, params=params)
-        print(r.status_code)  #200
-
-        print("Have Seat!!")
+        
 
     # schedule.every(10).seconds.do(run, playwright)
 
