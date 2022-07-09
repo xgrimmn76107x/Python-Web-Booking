@@ -47,11 +47,13 @@ def on_response(response):
     if '/orderAPI/otGetPossible' in response.url and response.status == 200:
         seat = 0
         res = response.json()["res2"]
+        
         index1 = res[0]
         content = index1["content"]
         index2 = content[0]
         # 多座位
         calendar = index2["calendar"]
+        # calendar["2022-07-16"] = 2
         for date in wantDate:
             tmpSeat = calendar[date]
             # tmpSeat = 2
@@ -87,33 +89,33 @@ def run(playwright: Playwright) -> None:
         page.locator("#modal-news >> text=我知道了").click()
 
         # ---------------------------------------------------------------------------------------------------------------------------------------
-        # # Click .wk-menu-btn >> nth=0
-        # page.locator(".wk-menu-btn").first.click()
+        # Click .wk-menu-btn >> nth=0
+        page.locator(".wk-menu-btn").first.click()
 
-        # # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder="手機"]
-        # page.locator(
-        #     "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").click()
-        # page.locator("text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").fill(
-        #     "0970230723")
+        # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder="手機"]
+        page.locator(
+            "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").click()
+        page.locator("text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").fill(
+            "0970230723")
 
-        # # page.fill('div[class="desktop-header hidden-sm hidden-xs"]{span[id="user_id"]}', "0970230723")
+        # page.fill('div[class="desktop-header hidden-sm hidden-xs"]{span[id="user_id"]}', "0970230723")
 
-        # # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type="password"]
-        # page.locator(
-        #     "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").click()
-        # page.locator(
-        #     "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").fill("pkrve27m")
-        # time.sleep(2)
+        # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type="password"]
+        page.locator(
+            "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").click()
+        page.locator(
+            "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").fill("pkrve27m")
+        time.sleep(2)
 
-        # # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> button[name="form-login"]
-        # # page.once("dialog", lambda dialog: dialog.dismiss())
+        # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> button[name="form-login"]
+        # page.once("dialog", lambda dialog: dialog.dismiss())
+        page.on("dialog", lambda dialog: dialog.accept())
+        page.on("dialog", lambda dialog: print(dialog.message))
+        page.locator(
+            "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> button[name=\"form-login\"]").click()
         # page.on("dialog", lambda dialog: dialog.accept())
         # page.on("dialog", lambda dialog: print(dialog.message))
-        # page.locator(
-        #     "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> button[name=\"form-login\"]").click()
-        # # page.on("dialog", lambda dialog: dialog.accept())
-        # # page.on("dialog", lambda dialog: print(dialog.message))
-        # # page.click("OK")
+        # page.click("OK")
         # ---------------------------------------------------------------------------------------------------------------------------------------
 
         # Click input[type="number"]
@@ -124,19 +126,29 @@ def run(playwright: Playwright) -> None:
         # Click [placeholder="隔日起 \~ 一個月內"]
         page.locator("[placeholder=\"隔日起 \\~ 一個月內\"]").click()
 
+        
+        # time.sleep(1.5)
+        # 下一頁
+        # # Click svg >> nth=1
+        # page.locator("svg").nth(1).click()
+
         # Click [aria-label="五月 03\, 2022"]
         page.locator(dataInfo).click()
 
         # Click text=晚餐
+        time.sleep(1)
         page.locator(mealTime).first.click()
 
-        # Click #select_store
-        page.locator("#select_store").click()
+        # # Click #select_store
+        # page.locator("#select_store").click()
 
-        # Click text=微風店 >> nth=1
-        page.locator("text=全部分店").nth(1).click()
+        # # Click text=微風店 >> nth=1
+        # page.locator("text=全部分店").nth(1).click()
 
-        while True:
+        timeloop = 0
+        while timeloop <= 3600:
+            timeloop += 15
+            d = []
             time.sleep(15)
             # Click text=晚餐
             page.locator(mealTime).first.click()
@@ -148,8 +160,10 @@ def run(playwright: Playwright) -> None:
                 oldSeat = seat
                 tmpMessage = ""
                 for date in wantDate:
-                    msg = date + "尚有" + str(wantDate[date]) + "個座位\n"
-                    tmpMessage += msg
+                    if (wantDate[date] >= 2):
+                        msg = date + "尚有" + str(wantDate[date]) + "個座位\n"
+                        d.append(date[-2:])
+                        tmpMessage += msg
                 params = {"message": tmpMessage}
         
                 r = requests.post("https://notify-api.line.me/api/notify",
@@ -157,6 +171,24 @@ def run(playwright: Playwright) -> None:
                 print(r.status_code)  #200
 
                 print("Have Seat!!")
+                # 訂位------------------------------------------------------------------------
+
+                page.locator("[placeholder=\"隔日起 \\~ 一個月內\"]").click()
+                
+                for i in d:
+                    time.sleep(1)
+                    haveSeatDateInfo = "[aria-label=\"七月 "+ i +"\\, 2022\"]"
+                    page.locator(haveSeatDateInfo).click()
+                    
+                    page.locator("td:nth-child(4)").click()
+
+                    time.sleep(2)
+
+                    page.locator("text=時間 請選擇 11:30 12:00 >> select").select_option("11:30")
+
+                    # Click text=確認訂位
+                    page.locator("text=確認訂位").click()
+                    
             
             
     except TimeoutError as timeoutError:
@@ -187,7 +219,7 @@ def run(playwright: Playwright) -> None:
 isHaveSeat = False
 seat = 0
 oldSeat = 0
-dataInfo = "[aria-label=\"七月 16\\, 2022\"]"
+dataInfo = "[aria-label=\"七月 30\\, 2022\"]"
 mealTime = "text=午餐"
 wantDate = {"2022-07-16": 0, "2022-07-23": 0}
 token = "QGuub3Vwntxa0RJbnzRlldcRGbaskNT85sS24V2bN4O"
