@@ -46,11 +46,11 @@ def on_response(response):
     global wantDate
     if '/orderAPI/otGetPossible' in response.url and response.status == 200:
         seat = 0
-        res = response.json()["res2"]
+        res = response.json()["res7"] #res2: 饗饗，res7: 開飯
         
         index1 = res[0]
         content = index1["content"]
-        index2 = content[0]
+        index2 = content[0]#大遠百店
         # 多座位
         calendar = index2["calendar"]
         # calendar["2022-07-16"] = 2
@@ -79,8 +79,8 @@ def run(playwright: Playwright) -> None:
     page = context.new_page()
     page.on('response', on_response)
 
-    # Go to https://www.feastogether.com.tw/booking/2
-    page.goto("https://www.feastogether.com.tw/booking/2")
+    # Go to https://www.feastogether.com.tw/booking/7
+    page.goto("https://www.feastogether.com.tw/booking/7")
     try:
         page.wait_for_load_state('networkidle')
         # time.sleep(2)
@@ -117,7 +117,13 @@ def run(playwright: Playwright) -> None:
         # page.on("dialog", lambda dialog: print(dialog.message))
         # page.click("OK")
         # ---------------------------------------------------------------------------------------------------------------------------------------
+        # 要訂台中的，所以多寫這個
+        # Click #select_area
+        page.locator("#select_area").click()
 
+        # Click text=台中市 >> nth=1
+        page.locator("text=台中市").nth(1).click()
+        #------------------------------------------------------------------------------------------------------------------------
         # Click input[type="number"]
         page.locator("input[type=\"number\"]").click()
 
@@ -127,10 +133,10 @@ def run(playwright: Playwright) -> None:
         page.locator("[placeholder=\"隔日起 \\~ 一個月內\"]").click()
 
         
-        # time.sleep(1.5)
+        time.sleep(1.5)
         # 下一頁
-        # # Click svg >> nth=1
-        # page.locator("svg").nth(1).click()
+        # Click svg >> nth=1
+        page.locator("svg").nth(1).click()
 
         # Click [aria-label="五月 03\, 2022"]
         page.locator(dataInfo).click()
@@ -173,21 +179,27 @@ def run(playwright: Playwright) -> None:
                 print("Have Seat!!")
                 # 訂位------------------------------------------------------------------------
 
-                page.locator("[placeholder=\"隔日起 \\~ 一個月內\"]").click()
+                # 訂位可能不能用了
+
+                # page.locator("[placeholder=\"隔日起 \\~ 一個月內\"]").click()
                 
-                for i in d:
-                    time.sleep(1)
-                    haveSeatDateInfo = "[aria-label=\"七月 "+ i +"\\, 2022\"]"
-                    page.locator(haveSeatDateInfo).click()
+                # for i in d:
+                #     time.sleep(1)
+                #     haveSeatDateInfo = "[aria-label=\"一月 "+ i +"\\, 2023\"]"
+                #     page.locator(haveSeatDateInfo).click()
                     
-                    page.locator("td:nth-child(4)").click()
+                #     # 舊的，訂饗饗只有信義微風店用的
+                #     # page.locator("td:nth-child(4)").click()
+                    
+                #     # Click td:has-text("大遠百店午餐") >> nth=0
+                #     page.locator("td:has-text(\"大遠百店晚餐\")").first.click()
 
-                    time.sleep(2)
+                #     time.sleep(2)
 
-                    page.locator("text=時間 請選擇 11:30 12:00 >> select").select_option("11:30")
+                #     page.locator("text=時間 請選擇 11:30 12:00 >> select").select_option("11:30")
 
-                    # Click text=確認訂位
-                    page.locator("text=確認訂位").click()
+                #     # Click text=確認訂位
+                #     page.locator("text=確認訂位").click()
                     
             
             
@@ -219,9 +231,9 @@ def run(playwright: Playwright) -> None:
 isHaveSeat = False
 seat = 0
 oldSeat = 0
-dataInfo = "[aria-label=\"七月 30\\, 2022\"]"
-mealTime = "text=午餐"
-wantDate = {"2022-07-16": 0, "2022-07-23": 0}
+dataInfo = "[aria-label=\"一月 14\\, 2023\"]"
+mealTime = "text=晚餐"
+wantDate = {"2023-01-14": 0}
 token = "QGuub3Vwntxa0RJbnzRlldcRGbaskNT85sS24V2bN4O"
 
 with sync_playwright() as playwright:
