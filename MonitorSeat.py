@@ -6,8 +6,8 @@ import time
 from datetime import datetime
 import schedule
 import requests
+import argparse
 
-# Line Notify Token: QGuub3Vwntxa0RJbnzRlldcRGbaskNT85sS24V2bN4O
 
 
  
@@ -22,7 +22,7 @@ def login(account, password, page):
     page.locator("text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").fill(
         account)
 
-    # page.fill('div[class="desktop-header hidden-sm hidden-xs"]{span[id="user_id"]}', "0970230723")
+    # page.fill('div[class="desktop-header hidden-sm hidden-xs"]{span[id="user_id"]}', "0912345678")
 
     # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type="password"]
     page.locator(
@@ -53,11 +53,11 @@ def on_response(response):
         index2 = content[0]#大遠百店
         # 多座位
         calendar = index2["calendar"]
-        # calendar["2022-07-16"] = 2
+        # calendar["2022-07-16"] = wantSeat
         for date in wantDate:
             tmpSeat = calendar[date]
-            # tmpSeat = 2
-            if (tmpSeat >= 2):
+            # tmpSeat = wantSeat
+            if (tmpSeat >= wantSeat):
                 wantDate[date] = tmpSeat
             seat += tmpSeat
             print(date, "座位:", tmpSeat, datetime.now())
@@ -96,15 +96,15 @@ def run(playwright: Playwright) -> None:
         page.locator(
             "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").click()
         page.locator("text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> [placeholder=\"手機\"]").fill(
-            "0970230723")
+            phone)
 
-        # page.fill('div[class="desktop-header hidden-sm hidden-xs"]{span[id="user_id"]}', "0970230723")
+        # page.fill('div[class="desktop-header hidden-sm hidden-xs"]{span[id="user_id"]}', "0912345678")
 
         # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type="password"]
         page.locator(
             "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").click()
         page.locator(
-            "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").fill("pkrve27m")
+            "text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> input[type=\"password\"]").fill(password)
         time.sleep(2)
 
         # Click text=帳戶 密碼 加入會員 | 忘記密碼 登入 會員登入 會員中心 登出 會員資料 訂位紀錄 線上支付 >> button[name="form-login"]
@@ -122,7 +122,7 @@ def run(playwright: Playwright) -> None:
         page.locator("#select_area").click()
 
         # Click text=台中市 >> nth=1
-        page.locator("text=台中市").nth(1).click()
+        page.locator("text="+area).nth(1).click()
         #------------------------------------------------------------------------------------------------------------------------
         # Click input[type="number"]
         page.locator("input[type=\"number\"]").click()
@@ -162,11 +162,11 @@ def run(playwright: Playwright) -> None:
             "Authorization": "Bearer " + token,
             "Content-Type": "application/x-www-form-urlencoded"
             }   
-            if (seat >= 2 and seat != oldSeat):
+            if (seat >= wantSeat and seat != oldSeat):
                 oldSeat = seat
                 tmpMessage = ""
                 for date in wantDate:
-                    if (wantDate[date] >= 2):
+                    if (wantDate[date] >= wantSeat):
                         msg = date + "尚有" + str(wantDate[date]) + "個座位\n"
                         d.append(date[-2:])
                         tmpMessage += msg
@@ -227,19 +227,90 @@ def run(playwright: Playwright) -> None:
     # # Select 11:30
     # page.locator("text=時間 請選擇 11:30 12:00 >> select").select_option("11:30")
 
+class Tools():
+    @staticmethod
+    def transform_month(month):
+        if month == '01':
+            return '一'
+        elif month == '02':
+            return '二'
+        elif month == '03':
+            return '三'
+        elif month == '04':
+            return '四'
+        elif month == '05':
+            return '五'
+        elif month == '06':
+            return '六'
+        elif month == '07':
+            return '七'
+        elif month == '08':
+            return '八'
+        elif month == '09':
+            return '九'
+        elif month == '10':
+            return '十'
+        elif month == '11':
+            return '十一'
+        elif month == '12':
+            return '十二'
+        else:
+            return ''
+    def transform_time(time):
+        if time == 'noon':
+            return '午餐'
+        elif time == 'tea':
+            return '下午茶'
+        elif time == 'dinner':
+            return '晚餐'
+        else:
+            return ''
+    
+def parser_loader():
+    parser = argparse.ArgumentParser(description = 'Monitor Seat')
+
+    parser.add_argument('--phone', type=str, default = '')
+    parser.add_argument('--password', type=str, default = '')
+    parser.add_argument('--date', type=str, default = '2023-01-01')
+    parser.add_argument('--count', type=int, default = 2)
+    parser.add_argument('--time', type=str, default = 'dinner') # noon, tea, dinner
+    parser.add_argument('--area', type=str, default = '台北市') 
+    parser.add_argument('--branch', type=str, default = '信義店') 
+    parser.add_argument('--lineToken', type=str, default = '') 
+    
+    return parser
+
+# Start ----------------------------------------------------
+parser = parser_loader()
+args = vars(parser.parse_args())
+print(args)
+
+dateArr = args['date'].split("-")
+year = dateArr[0]
+month = Tools.transform_month(dateArr[1])
+day = dateArr[2]
 
 isHaveSeat = False
 seat = 0
 oldSeat = 0
-dataInfo = "[aria-label=\"一月 14\\, 2023\"]"
-mealTime = "text=晚餐"
-wantDate = {"2023-01-14": 0}
-token = "QGuub3Vwntxa0RJbnzRlldcRGbaskNT85sS24V2bN4O"
+phone = args['phone']
+password = args['password']
+dataInfo = "[aria-label=\"" + month + "月 " + day + "\\, " + year + "\"]" # "[aria-label=\"一月 14\\, 2023\"]"
+mealTime = "text="+ Tools.transform_time(args['time'])
+wantDate = {args['date']: 0}# {"2023-01-14": 0}
+wantSeat = args['count']
+area = args['area']
+branch = args['branch']
 
-with sync_playwright() as playwright:
-    while True:
-        run(playwright)
-        time.sleep(2)
+
+token = args['token']
+
+
+
+# with sync_playwright() as playwright:
+#     while True:
+#         run(playwright)
+#         time.sleep(2)
     
         
 
